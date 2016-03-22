@@ -63,16 +63,28 @@ void koch_line(glm::vec3 a, glm::vec3 b, int iter)
 	}
 }
 
+void make_snowflake(glm::vec3 origin, float radius, int iter)
+{
+	glm::vec3 a = glm::vec3(origin.x - radius * sqrt(0.75f), origin.y - radius * 0.5f, 0);
+	glm::vec3 b = glm::vec3(origin.x, origin.y + radius, 0);
+	glm::vec3 c = glm::vec3(origin.x + radius * sqrt(0.75f), origin.y - radius * 0.5f, 0);
+
+	g_vertex_buffer_data.push_back(a);
+	g_vertex_buffer_data.push_back(b);
+	g_vertex_buffer_data.push_back(c);
+
+	koch_line(a, c, iter);
+	koch_line(b, a, iter);
+	koch_line(c, b, iter);
+}
+
 // TODO: Initialize model
 void init_model(void)
 {
 	g_vertex_buffer_data = std::vector<glm::vec3>();
-	g_vertex_buffer_data.push_back(glm::vec3(-0.5f, -0.25f, 0.0f));
-	g_vertex_buffer_data.push_back(glm::vec3(0.0f, sqrt(0.75) - 0.25f, 0.0f));
-	g_vertex_buffer_data.push_back(glm::vec3(0.5f, -0.25f, 0.0f));
-	koch_line(glm::vec3(-0.5f, -0.25f, 0.0f), glm::vec3(0.5f, -0.25f, 0.0f), 3);
-	koch_line(glm::vec3(0.0f, sqrt(0.75) - 0.25f, 0.0f), glm::vec3(-0.5f, -0.25f, 0.0f), 3);
-	koch_line(glm::vec3(0.5f, -0.25f, 0.0f), glm::vec3(0.0f, sqrt(0.75) - 0.25f, 0.0f) , 3);
+	
+	make_snowflake(glm::vec3(-0.5f,-0.5f,0), 0.2f, 3);
+	make_snowflake(glm::vec3(0, 0, 0), 0.2f, 3);
 	// Generates Vertex Array Objects in the GPU¡¯s memory and passes back their identifiers
 	// Create a vertex array object that represents vertex attributes stored in a vertex buffer object.
 		glGenVertexArrays(1, &VAID);
