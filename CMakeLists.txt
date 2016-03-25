@@ -72,6 +72,8 @@ common/shader.cpp
 common/shader.hpp
 Lab1/VertexShader.glsl
 Lab1/FragmentShader.glsl
+Lab1/SnowFlakeFragmentShader.glsl
+Lab1/SnowFlakeVertexShader.glsl
 )
 target_link_libraries(Lab1
 ${ALL_LIBS}

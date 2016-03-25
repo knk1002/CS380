@@ -25,6 +25,7 @@ GLFWwindow* window;
 int windowWidth, windowHeight;
 
 GLuint programID;
+GLuint snowFlakeProgramID;
 GLuint VAID;
 GLuint VBID;
 
@@ -155,13 +156,14 @@ int main(int argc, char* argv[])
 	glm::mat4 MVP = Projection * View * Model;
 
 	// TODO: Initialize OpenGL and GLSL
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClearColor(0.39f,0.58f,0.93f,0.0f);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	int width, height;
 	glfwGetFramebufferSize(window, &width, &height);
 	glViewport(0, 0, width, height);
 	programID = LoadShaders("VertexShader.glsl", "FragmentShader.glsl");
+	snowFlakeProgramID = LoadShaders("SnowFlakeVertexShader.glsl", "SnowFlakeFragmentShader.glsl");
 	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
 
 	// END

@@ -127,7 +127,8 @@ static void keyboard_callback(GLFWwindow* window, int key, int scancode, int act
 			break;
 		default:
 			break;
-		}
+		}
+
 	}
 	else {
 		// TODO: Compute Transformation with Keyboard Input
@@ -166,7 +167,8 @@ static void keyboard_callback(GLFWwindow* window, int key, int scancode, int act
 			break;
 		default:
 			break;
-		}
+		}
+
 		// TODO: Apply Transformation To Frame
 		switch (select_frame)
 		{
@@ -262,7 +264,8 @@ int main(void)
 	greenCube.set_eye(&eyeRBT);
 	greenCubeRBT = glm::translate(glm::mat4(1.0f), glm::vec3(1.5f, 0.5f,
 		0.0f)) * glm::rotate(glm::mat4(1.0f), 90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-	greenCube.set_model(&greenCubeRBT);
+	greenCube.set_model(&greenCubeRBT);
+
 
 	// TODO END
 
@@ -295,7 +298,8 @@ int main(void)
 
 		// TODO: Draw Two Cube Models
 		redCube.draw();
-		greenCube.draw();
+		greenCube.draw();
+
 
 		// TODO END
 
