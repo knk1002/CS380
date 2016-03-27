@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <vector>
+#include <list>
 
 // Include GLEW
 #include <GL/glew.h>
@@ -19,6 +20,27 @@ using namespace glm;
 // Shader library
 #include <common/shader.hpp>
 
+GLfloat randd() {
+	return (GLfloat)rand() / ((float)RAND_MAX + 1);
+}
+
+class SnowFlake
+{
+public:
+	std::vector<glm::vec3> flake_buffer_data;
+	glm::vec3 center;
+	double runtime;
+	glm::vec3 color;
+
+	SnowFlake(glm::vec3 inputCenter)
+	{
+		flake_buffer_data = std::vector<glm::vec3>();
+		center = inputCenter;
+		runtime = 0.0;
+		color = glm::vec3(randd(), randd(), randd());
+	}
+};
+
 #define BUFFER_OFFSET( offset ) ((GLvoid*) (offset))
 
 GLFWwindow* window;
@@ -30,13 +52,16 @@ GLuint VAID;
 GLuint VBID;
 
 std::vector<glm::vec3> g_vertex_buffer_data;
+std::vector<SnowFlake> sf_buffer_data;
 
 glm::mat4 Projection;
 glm::mat4 View;
 float degree = 0.0f;
+double oldtime = 0.0;
+double elapsedtime = 0.0;
+bool dir;
 
-// TODO: Implement koch snowflake
-void koch_line(glm::vec3 a, glm::vec3 b, int iter)
+void koch_line(SnowFlake *snowFlake, glm::vec3 a, glm::vec3 b, int iter)
 {
 	glm::vec3 new_a = glm::vec3(a.x + (b.x - a.x) / 3, a.y + (b.y - a.y) / 3, 0);
 	glm::vec3 new_b = glm::vec3(a.x +  2 * (b.x - a.x) / 3, a.y +  2 * (b.y - a.y) / 3, 0);
@@ -51,68 +76,119 @@ void koch_line(glm::vec3 a, glm::vec3 b, int iter)
 	printf("%lf,%lf,%lf\n", new_b.x, new_b.y, new_b.z);
 	printf("%lf,%lf,%lf\n", new_c.x, new_c.y, new_c.z);*/
 
-	g_vertex_buffer_data.push_back(new_a);
-	g_vertex_buffer_data.push_back(new_b);
-	g_vertex_buffer_data.push_back(new_c);
+	snowFlake->flake_buffer_data.push_back(new_a);
+	snowFlake->flake_buffer_data.push_back(new_b);
+	snowFlake->flake_buffer_data.push_back(new_c);
 	
 	if (iter > 0)
 	{
-		koch_line(a, new_a, iter - 1);
-		koch_line(new_a, new_c, iter - 1);
-		koch_line(new_c, new_b, iter - 1);
-		koch_line(new_b, b, iter - 1);
+		koch_line(snowFlake, a, new_a, iter - 1);
+		koch_line(snowFlake, new_a, new_c, iter - 1);
+		koch_line(snowFlake, new_c, new_b, iter - 1);
+		koch_line(snowFlake, new_b, b, iter - 1);
 	}
 }
 
 void make_snowflake(glm::vec3 origin, float radius, int iter)
 {
+	SnowFlake snowFlake = SnowFlake(origin);
 	glm::vec3 a = glm::vec3(origin.x - radius * sqrt(0.75f), origin.y - radius * 0.5f, 0);
 	glm::vec3 b = glm::vec3(origin.x, origin.y + radius, 0);
 	glm::vec3 c = glm::vec3(origin.x + radius * sqrt(0.75f), origin.y - radius * 0.5f, 0);
 
-	g_vertex_buffer_data.push_back(a);
-	g_vertex_buffer_data.push_back(b);
-	g_vertex_buffer_data.push_back(c);
+	snowFlake.flake_buffer_data.push_back(a);
+	snowFlake.flake_buffer_data.push_back(b);
+	snowFlake.flake_buffer_data.push_back(c);
 
-	koch_line(a, c, iter);
-	koch_line(b, a, iter);
-	koch_line(c, b, iter);
+	koch_line(&snowFlake, a, c, iter);
+	koch_line(&snowFlake, b, a, iter);
+	koch_line(&snowFlake, c, b, iter);
+
+	sf_buffer_data.push_back(snowFlake);
 }
 
 // TODO: Initialize model
 void init_model(void)
 {
 	g_vertex_buffer_data = std::vector<glm::vec3>();
-	
-	make_snowflake(glm::vec3(-0.5f,-0.5f,0), 0.2f, 3);
-	make_snowflake(glm::vec3(0, 0, 0), 0.2f, 3);
+
+	//make_snowflake(glm::vec3(0.0f, 0.4f, 0), 0.2f, 3);
+
+	for (int i = 0; i < 8; i++)
+	{
+		for (int j = 0; j < 6; j++)
+		{
+			if(i % 2 == 0)
+				make_snowflake(glm::vec3(-1.4f + j * 0.5f, 1.8f - i * 0.4f, 0), 0.2f, 3);
+			else
+				make_snowflake(glm::vec3(-1.2f + j * 0.5f, 1.8f - i * 0.4f, 0), 0.2f, 3);
+		}
+	}
 	// Generates Vertex Array Objects in the GPU¡¯s memory and passes back their identifiers
 	// Create a vertex array object that represents vertex attributes stored in a vertex buffer object.
-		glGenVertexArrays(1, &VAID);
+	glGenVertexArrays(1, &VAID);
 	glBindVertexArray(VAID);
 	// Create and initialize a buffer object, Generates our buffers in the GPU¡¯s memory
 	glGenBuffers(1, &VBID);
 	glBindBuffer(GL_ARRAY_BUFFER, VBID);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*g_vertex_buffer_data.size(),
-		&g_vertex_buffer_data[0], GL_STATIC_DRAW);
+}
+
+void draw_snowFlake(double deltatime)
+{
+	if (!dir)
+		elapsedtime += deltatime;
+	else
+		elapsedtime -= deltatime;
+	printf("%f\n", elapsedtime);
+
+	if (elapsedtime > 8.0)
+	{
+		elapsedtime = 8.0;
+		dir = true;
+
+	}
+	else if (elapsedtime < 0.0)
+	{
+		elapsedtime = 0.0;
+		dir = false;
+	}
+
+	for (int i = 0; i < sf_buffer_data.size(); i++)
+	{
+		//printf("%f\n", sf_buffer_data[i].runtime);
+		glm::mat4 Model = glm::mat4(1.0f);
+		glm::mat4 origin_move = glm::translate(-sf_buffer_data[i].center);
+		glm::mat4 translate_snow = glm::translate(glm::vec3(0, -elapsedtime * 0.15f, 0));
+		glm::mat4 R = glm::rotate(degree, glm::vec3(0, 0, 1));
+		glm::mat4 reset_pos = glm::translate(sf_buffer_data[i].center);
+		glm::mat4 MVP = Projection * View * Model * translate_snow * reset_pos * R * origin_move;
+
+		glBindVertexArray(VAID);
+		glEnableVertexAttribArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, VBID);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), BUFFER_OFFSET(0));
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*sf_buffer_data[i].flake_buffer_data.size(),
+			&sf_buffer_data[i].flake_buffer_data[0], GL_STATIC_DRAW);
+		GLuint MatrixID = glGetUniformLocation(snowFlakeProgramID, "MVP");
+		GLuint ColorVectorID = glGetUniformLocation(snowFlakeProgramID, "colorIn");
+		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+		//printf("%f,%f,%f\n", color.x,color.y,color.z);
+		glUniform3f(ColorVectorID, sf_buffer_data[i].color.x, sf_buffer_data[i].color.y, sf_buffer_data[i].color.z);
+		glDrawArrays(GL_TRIANGLES, 0, sf_buffer_data[i].flake_buffer_data.size());
+		glDisableVertexAttribArray(0);
+	}
+
+	degree += 2;
 }
 
 // TODO: Draw model
 void draw_model()
 {
 	glUseProgram(programID);
-	glBindVertexArray(VAID);
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, VBID);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), BUFFER_OFFSET(0));
-	glm::mat4 Model = glm::mat4(1.0f);
-	glm::mat4 R = glm::rotate(degree, glm::vec3(0, 0, 1));
-	glm::mat4 MVP = Projection * View * Model * R;
-	degree += 2;
-	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
-	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-	glDrawArrays(GL_TRIANGLES, 0, g_vertex_buffer_data.size());
-	glDisableVertexAttribArray(0);
+	glUseProgram(snowFlakeProgramID);
+	double deltatime = glfwGetTime() - oldtime;
+	oldtime = glfwGetTime();
+	draw_snowFlake(deltatime);
 }
 
 int main(int argc, char* argv[])
@@ -148,6 +224,8 @@ int main(int argc, char* argv[])
 
 	// END
 
+	dir = false;
+
 	Projection = glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f);
 	View = glm::lookAt(glm::vec3(0, 0, 2),
 				 				 glm::vec3(0, 0, 0),
@@ -156,7 +234,8 @@ int main(int argc, char* argv[])
 	glm::mat4 MVP = Projection * View * Model;
 
 	// TODO: Initialize OpenGL and GLSL
-	glClearColor(0.39f,0.58f,0.93f,0.0f);
+	//glClearColor(0.39f,0.58f,0.93f,0.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	int width, height;
@@ -164,7 +243,7 @@ int main(int argc, char* argv[])
 	glViewport(0, 0, width, height);
 	programID = LoadShaders("VertexShader.glsl", "FragmentShader.glsl");
 	snowFlakeProgramID = LoadShaders("SnowFlakeVertexShader.glsl", "SnowFlakeFragmentShader.glsl");
-	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
+	GLuint MatrixID = glGetUniformLocation(snowFlakeProgramID, "MVP");
 
 	// END
 	init_model();
@@ -184,6 +263,7 @@ int main(int argc, char* argv[])
 
 	glDeleteBuffers(1, &VBID);
 	glDeleteProgram(programID);
+	glDeleteProgram(snowFlakeProgramID);
 	glDeleteVertexArrays(1, &VAID);
 
 	glfwTerminate();
