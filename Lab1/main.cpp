@@ -72,10 +72,6 @@ void koch_line(SnowFlake *snowFlake, glm::vec3 a, glm::vec3 b, int iter)
 	new_c = rotate * new_c;
 	new_c = new_a + new_c;
 
-	/*printf("%lf,%lf,%lf\n", new_a.x,new_a.y,new_a.z);
-	printf("%lf,%lf,%lf\n", new_b.x, new_b.y, new_b.z);
-	printf("%lf,%lf,%lf\n", new_c.x, new_c.y, new_c.z);*/
-
 	snowFlake->flake_buffer_data.push_back(new_a);
 	snowFlake->flake_buffer_data.push_back(new_b);
 	snowFlake->flake_buffer_data.push_back(new_c);
@@ -112,8 +108,6 @@ void init_model(void)
 {
 	g_vertex_buffer_data = std::vector<glm::vec3>();
 
-	//make_snowflake(glm::vec3(0.0f, 0.4f, 0), 0.2f, 3);
-
 	for (int i = 0; i < 8; i++)
 	{
 		for (int j = 0; j < 6; j++)
@@ -139,23 +133,23 @@ void draw_snowFlake(double deltatime)
 		elapsedtime += deltatime;
 	else
 		elapsedtime -= deltatime;
-	printf("%f\n", elapsedtime);
 
 	if (elapsedtime > 8.0)
 	{
+		degree = 0;
 		elapsedtime = 8.0;
 		dir = true;
 
 	}
 	else if (elapsedtime < 0.0)
 	{
+		degree = 0;
 		elapsedtime = 0.0;
 		dir = false;
 	}
 
 	for (int i = 0; i < sf_buffer_data.size(); i++)
 	{
-		//printf("%f\n", sf_buffer_data[i].runtime);
 		glm::mat4 Model = glm::mat4(1.0f);
 		glm::mat4 origin_move = glm::translate(-sf_buffer_data[i].center);
 		glm::mat4 translate_snow = glm::translate(glm::vec3(0, -elapsedtime * 0.15f, 0));
@@ -202,31 +196,27 @@ int main(int argc, char* argv[])
 	{
 		return -1;
 	}
+
 	glfwWindowHint(GLFW_SAMPLES, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-	// TODO: GLFW create window and context
 	window = glfwCreateWindow(1024, 768, "Lab 1", NULL, NULL);
 	if (window == NULL)
 	{
 		return -1;
 	}
+
 	glfwMakeContextCurrent(window);
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
-	// END
-
-	// TODO: Initialize GLEW
 	glewExperimental = GL_TRUE;
 	if (glewInit() != GLEW_OK)
 	{
 		return -1;
 	}
-
-	// END
 
 	dir = false;
 
@@ -237,9 +227,7 @@ int main(int argc, char* argv[])
 	glm::mat4 Model = glm::mat4(1.0f);
 	glm::mat4 MVP = Projection * View * Model;
 
-	// TODO: Initialize OpenGL and GLSL
 	glClearColor(0.39f,0.58f,0.93f,0.0f);
-	//glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	int width, height;
@@ -249,7 +237,6 @@ int main(int argc, char* argv[])
 	snowFlakeProgramID = LoadShaders("SnowFlakeVertexShader.glsl", "SnowFlakeFragmentShader.glsl");
 	GLuint MatrixID = glGetUniformLocation(snowFlakeProgramID, "MVP");
 
-	// END
 	init_model();
 
 	// Step 2: Main event loop
