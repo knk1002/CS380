@@ -24,19 +24,19 @@ GLfloat randd() {
 	return (GLfloat)rand() / ((float)RAND_MAX + 1);
 }
 
+//make SnowFlake Class
 class SnowFlake
 {
 public:
-	std::vector<glm::vec3> flake_buffer_data;
-	glm::vec3 center;
-	double runtime;
-	glm::vec3 color;
+	std::vector<glm::vec3> flake_buffer_data; //SnowFlake's vertex buffer
+	glm::vec3 center;//store the center of SnowFlake
+	glm::vec3 color;//store the color of SnowFlake
 
+	//Constructor
 	SnowFlake(glm::vec3 inputCenter)
 	{
 		flake_buffer_data = std::vector<glm::vec3>();
 		center = inputCenter;
-		runtime = 0.0;
 		color = glm::vec3(randd(), randd(), randd());
 	}
 };
@@ -47,18 +47,22 @@ GLFWwindow* window;
 int windowWidth, windowHeight;
 
 GLuint programID;
-GLuint snowFlakeProgramID;
+GLuint snowFlakeProgramID; //need another shader program only to use in SnowFlake
 GLuint VAID;
 GLuint VBID;
 
 std::vector<glm::vec3> g_vertex_buffer_data;
-std::vector<SnowFlake> sf_buffer_data;
+std::vector<SnowFlake> sf_buffer_data;//global SnowFlake data
 
 glm::mat4 Projection;
 glm::mat4 View;
 float degree = 0.0f;
+
+//variable to use calculating deltatime
 double oldtime = 0.0;
 double elapsedtime = 0.0;
+
+//change translate direction of SnowFlake
 bool dir;
 
 void koch_line(SnowFlake *snowFlake, glm::vec3 a, glm::vec3 b, int iter)
@@ -108,6 +112,7 @@ void init_model(void)
 {
 	g_vertex_buffer_data = std::vector<glm::vec3>();
 
+	//make SnowFlakes
 	for (int i = 0; i < 8; i++)
 	{
 		for (int j = 0; j < 6; j++)
@@ -151,14 +156,14 @@ void draw_snowFlake(double deltatime)
 	for (int i = 0; i < sf_buffer_data.size(); i++)
 	{
 		glm::mat4 Model = glm::mat4(1.0f);
-		glm::mat4 origin_move = glm::translate(-sf_buffer_data[i].center);
 		glm::mat4 translate_snow = glm::translate(glm::vec3(0, -elapsedtime * 0.15f, 0));
 		glm::mat4 R;
 		if(!dir)
 			R = glm::rotate(degree, glm::vec3(0, 0, 1));
 		else
 			R = glm::rotate(-degree, glm::vec3(0, 0, 1));
-		glm::mat4 reset_pos = glm::translate(sf_buffer_data[i].center);
+		glm::mat4 origin_move = glm::translate(-sf_buffer_data[i].center); //move to origin
+		glm::mat4 reset_pos = glm::translate(sf_buffer_data[i].center);//after rotate, return to its position
 		glm::mat4 MVP = Projection * View * Model * translate_snow * reset_pos * R * origin_move;
 
 		glBindVertexArray(VAID);
@@ -170,7 +175,6 @@ void draw_snowFlake(double deltatime)
 		GLuint MatrixID = glGetUniformLocation(snowFlakeProgramID, "MVP");
 		GLuint ColorVectorID = glGetUniformLocation(snowFlakeProgramID, "colorIn");
 		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-		//printf("%f,%f,%f\n", color.x,color.y,color.z);
 		glUniform3f(ColorVectorID, sf_buffer_data[i].color.x, sf_buffer_data[i].color.y, sf_buffer_data[i].color.z);
 		glDrawArrays(GL_TRIANGLES, 0, sf_buffer_data[i].flake_buffer_data.size());
 		glDisableVertexAttribArray(0);
