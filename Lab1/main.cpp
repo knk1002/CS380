@@ -159,7 +159,11 @@ void draw_snowFlake(double deltatime)
 		glm::mat4 Model = glm::mat4(1.0f);
 		glm::mat4 origin_move = glm::translate(-sf_buffer_data[i].center);
 		glm::mat4 translate_snow = glm::translate(glm::vec3(0, -elapsedtime * 0.15f, 0));
-		glm::mat4 R = glm::rotate(degree, glm::vec3(0, 0, 1));
+		glm::mat4 R;
+		if(!dir)
+			R = glm::rotate(degree, glm::vec3(0, 0, 1));
+		else
+			R = glm::rotate(-degree, glm::vec3(0, 0, 1));
 		glm::mat4 reset_pos = glm::translate(sf_buffer_data[i].center);
 		glm::mat4 MVP = Projection * View * Model * translate_snow * reset_pos * R * origin_move;
 
@@ -234,8 +238,8 @@ int main(int argc, char* argv[])
 	glm::mat4 MVP = Projection * View * Model;
 
 	// TODO: Initialize OpenGL and GLSL
-	//glClearColor(0.39f,0.58f,0.93f,0.0f);
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClearColor(0.39f,0.58f,0.93f,0.0f);
+	//glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	int width, height;
