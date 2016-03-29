@@ -107,6 +107,25 @@ void make_snowflake(glm::vec3 origin, float radius, int iter)
 	sf_buffer_data.push_back(snowFlake);
 }
 
+void make_background()
+{
+	g_vertex_buffer_data.push_back(glm::vec3(-0.7f, -0.8f, -1.0f));
+	g_vertex_buffer_data.push_back(glm::vec3(-0.7f, 0.0f, -1.0f));
+	g_vertex_buffer_data.push_back(glm::vec3(0.7f, -0.8f, -1.0f));
+	g_vertex_buffer_data.push_back(glm::vec3(-0.7f, 0.0f, -1.0f));
+	g_vertex_buffer_data.push_back(glm::vec3(0.7f, -0.8f, -1.0f));
+	g_vertex_buffer_data.push_back(glm::vec3(0.7f, 0.0f, -1.0f));
+	g_vertex_buffer_data.push_back(glm::vec3(-1.0f, 0.0f, -1.0f));
+	g_vertex_buffer_data.push_back(glm::vec3(0.0f, 0.8f, -1.0f));
+	g_vertex_buffer_data.push_back(glm::vec3(1.0f, 0.0f, -1.0f));
+	g_vertex_buffer_data.push_back(glm::vec3(0.4f, 0.0f, -1.0f));
+	g_vertex_buffer_data.push_back(glm::vec3(0.6f, 0.0f, -1.0f));
+	g_vertex_buffer_data.push_back(glm::vec3(0.4f, 0.7f, -1.0f));
+	g_vertex_buffer_data.push_back(glm::vec3(0.4f, 0.7f, -1.0f));
+	g_vertex_buffer_data.push_back(glm::vec3(0.6f, 0.0f, -1.0f));
+	g_vertex_buffer_data.push_back(glm::vec3(0.6f, 0.7f, -1.0f));
+}
+
 // TODO: Initialize model
 void init_model(void)
 {
@@ -123,6 +142,7 @@ void init_model(void)
 				make_snowflake(glm::vec3(-1.2f + j * 0.5f, 1.8f - i * 0.4f, 0), 0.2f, 3);
 		}
 	}
+	make_background();
 	// Generates Vertex Array Objects in the GPU¡¯s memory and passes back their identifiers
 	// Create a vertex array object that represents vertex attributes stored in a vertex buffer object.
 	glGenVertexArrays(1, &VAID);
@@ -134,6 +154,7 @@ void init_model(void)
 
 void draw_snowFlake(double deltatime)
 {
+	glUseProgram(snowFlakeProgramID);
 	if (!dir)
 		elapsedtime += deltatime;
 	else
@@ -183,14 +204,32 @@ void draw_snowFlake(double deltatime)
 	degree += 2;
 }
 
+void draw_background()
+{
+	glUseProgram(programID);
+
+	glm::mat4 Model = glm::mat4(1.0f);
+	glm::mat4 MVP = Projection * View * Model;
+
+	glBindVertexArray(VAID);
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, VBID);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), BUFFER_OFFSET(0));
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*g_vertex_buffer_data.size(),
+		&g_vertex_buffer_data[0], GL_STATIC_DRAW);
+	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
+	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+	glDrawArrays(GL_TRIANGLES, 0, g_vertex_buffer_data.size());
+	glDisableVertexAttribArray(0);
+}
+
 // TODO: Draw model
 void draw_model()
 {
-	glUseProgram(programID);
-	glUseProgram(snowFlakeProgramID);
 	double deltatime = glfwGetTime() - oldtime;
 	oldtime = glfwGetTime();
 	draw_snowFlake(deltatime);
+	draw_background();
 }
 
 int main(int argc, char* argv[])
@@ -237,8 +276,8 @@ int main(int argc, char* argv[])
 	int width, height;
 	glfwGetFramebufferSize(window, &width, &height);
 	glViewport(0, 0, width, height);
-	programID = LoadShaders("VertexShader.glsl", "FragmentShader.glsl");
 	snowFlakeProgramID = LoadShaders("SnowFlakeVertexShader.glsl", "SnowFlakeFragmentShader.glsl");
+	programID = LoadShaders("VertexShader.glsl", "FragmentShader.glsl");
 	GLuint MatrixID = glGetUniformLocation(snowFlakeProgramID, "MVP");
 
 	init_model();
