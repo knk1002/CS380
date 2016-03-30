@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <list>
+#include <time.h>
 
 // Include GLEW
 #include <GL/glew.h>
@@ -21,7 +22,7 @@ using namespace glm;
 #include <common/shader.hpp>
 
 GLfloat randd() {
-	return (GLfloat)rand() / ((float)RAND_MAX + 1);
+	return (GLfloat) rand() / ((float)RAND_MAX + 1);
 }
 
 //make SnowFlake Class
@@ -262,6 +263,7 @@ int main(int argc, char* argv[])
 	}
 
 	dir = false;
+	srand(time(NULL));
 
 	Projection = glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f);
 	View = glm::lookAt(glm::vec3(0, 0, 2),
