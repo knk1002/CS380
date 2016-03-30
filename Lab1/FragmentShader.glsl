@@ -1,9 +1,9 @@
 #version 330 core
 
 // Ouput color
-out vec3 color;
+uniform vec3 colorIn;
+out vec3 colorOut;
 
 void main(){
-	// Output color = color specified in the vertex shader
-	color = vec3(1.0, 1.0, 1.0);
+	colorOut = vec3(colorIn.x,colorIn.y,colorIn.z);
 }
