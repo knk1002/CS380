@@ -101,8 +101,14 @@ create_target_launcher(Lab2 WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Lab2/
 
 add_executable(Lab3
 	Lab3/main.cpp
-	Lab3/VertexShader.glsl
-	Lab3/FragmentShader.glsl
+	Lab3/NormalVertexShader.glsl
+	Lab3/NormalFragmentShader.glsl
+	Lab3/GouraudVertexShader.glsl
+	Lab3/GouraudFragmentShader.glsl
+	Lab3/PhongVertexShader.glsl
+	Lab3/PhongFragmentShader.glsl
+	Lab3/ToonVertexShader.glsl
+	Lab3/ToonFragmentShader.glsl
 	common/shader.cpp
 	common/shader.hpp
 	common/model.cpp

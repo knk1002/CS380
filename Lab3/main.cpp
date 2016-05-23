@@ -25,7 +25,7 @@ using namespace glm;
 float g_groundSize = 100.0f;
 float g_groundY = -2.5f;
 
-GLuint lightLocGround, lightLocObject;
+GLuint lightLocGround, lightLocObjectOne, lightLocObjectTwo, lightLocObjectThree;
 
 // View properties
 glm::mat4 Projection;
@@ -37,11 +37,12 @@ float fov = 45.0f;
 float fovy = fov;
 
 // Model properties
-Model ground, object;
+Model ground, objectOne, objectTwo, objectThree;
 glm::mat4 skyRBT;
 glm::mat4 eyeRBT;
 const glm::mat4 worldRBT = glm::mat4(1.0f);
-glm::mat4 objectRBT = glm::scale(7.0f, 7.0f, 7.0f) * glm::rotate(glm::mat4(1.0f), 10.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+glm::mat4 objectOneRBT = glm::scale(7.0f, 7.0f, 7.0f) * glm::rotate(glm::mat4(1.0f), 10.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+glm::mat4 objectTwoRBT = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f,0.0f,0.0f)) * glm::scale(7.0f, 7.0f, 7.0f) * glm::rotate(glm::mat4(1.0f), 10.0f, glm::vec3(1.0f, 0.0f, 0.0f));
 glm::mat4 arcballRBT = glm::mat4(1.0f);
 glm::mat4 aFrame;
 
@@ -120,7 +121,7 @@ void setWrtFrame()
 		aFrame = (sky_type == 0) ? linearFact(skyRBT) : skyRBT;
 		break;
 	case 1:
-		aFrame = transFact(objectRBT) * linearFact(eyeRBT);
+		aFrame = transFact(objectOneRBT) * linearFact(eyeRBT);
 		break;
 	}
 }
@@ -189,7 +190,7 @@ static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 		// Apply transformation with auxiliary frame
 		setWrtFrame();
 		if (object_index == 0) { skyRBT = aFrame * m * glm::inverse(aFrame) * skyRBT; }
-		else { objectRBT = aFrame * m * glm::inverse(aFrame) * objectRBT; }
+		else { objectOneRBT = aFrame * m * glm::inverse(aFrame) * objectOneRBT; }
 
 		prev_x = (float)xpos; prev_y = (float)ypos;
 	}
@@ -321,41 +322,62 @@ int main(void)
 	// Initialize Ground Model
 	ground = Model();
 	init_ground(ground);
-	ground.initialize(DRAW_TYPE::ARRAY, "VertexShader.glsl", "FragmentShader.glsl");
+	ground.initialize(DRAW_TYPE::ARRAY, "NormalVertexShader.glsl", "NormalFragmentShader.glsl");
 	ground.set_projection(&Projection);
 	ground.set_eye(&eyeRBT);
 	glm::mat4 groundRBT = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, g_groundY, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(g_groundSize, 1.0f, g_groundSize));
 	ground.set_model(&groundRBT);
 
 	//TODO: Initialize model by loading .obj file
-	object = Model();
-	init_obj(object, "bunny.obj", glm::vec3(0.1, 0.3, 1.0));
-	object.initialize(DRAW_TYPE::ARRAY, "VertexShader.glsl","FragmentShader.glsl");
-	object.set_projection(&Projection);
-	object.set_eye(&eyeRBT);
-	object.set_model(&objectRBT);
+	objectOne = Model();
+	init_obj(objectOne, "bunny.obj", glm::vec3(0.1, 0.3, 1.0));
+	objectOne.initialize(DRAW_TYPE::ARRAY, "NormalVertexShader.glsl","NormalFragmentShader.glsl");
+	objectOne.set_projection(&Projection);
+	objectOne.set_eye(&eyeRBT);
+	objectOne.set_model(&objectOneRBT);
+
+	objectTwo = Model();
+	init_obj(objectTwo, "bunny.obj", glm::vec3(0.6, 0.3, 1.0));
+	objectTwo.initialize(DRAW_TYPE::ARRAY, "PhongVertexShader.glsl", "PhongFragmentShader.glsl");
+	objectTwo.set_projection(&Projection);
+	objectTwo.set_eye(&eyeRBT);
+	objectTwo.set_model(&objectTwoRBT);
+
 	arcBall = Model();
 	init_sphere(arcBall);
-	arcBall.initialize(DRAW_TYPE::INDEX, "VertexShader.glsl", "FragmentShader.glsl");
+	arcBall.initialize(DRAW_TYPE::INDEX, "NormalVertexShader.glsl", "NormalFragmentShader.glsl");
 
 	arcBall.set_projection(&Projection);
 	arcBall.set_eye(&eyeRBT);
 	arcBall.set_model(&arcballRBT);
 
-	//TODO Setting Light Vectors	
+	//TODO Setting Light Vectors
+	lightLocGround = glGetUniformLocation(ground.GLSLProgramID, "uLight");
+	lightLocObjectOne = glGetUniformLocation(objectOne.GLSLProgramID, "uLight");
+	lightLocObjectTwo = glGetUniformLocation(objectOne.GLSLProgramID, "uLight");
+	lightLocObjectThree = glGetUniformLocation(objectOne.GLSLProgramID, "uLight");
 
 	do {
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		eyeRBT = (view_index == 0) ? skyRBT : objectRBT;
+		eyeRBT = (view_index == 0) ? skyRBT : objectOneRBT;
 
 		//TODO: pass the light value to the shader
-		
+		glm::vec3 lightVec = glm::vec3(0.0f, 1.0f, 0.0f);
+		lightLocGround = glGetUniformLocation(ground.GLSLProgramID, "uLight");
+		glUniform3f(lightLocGround, lightVec.x, lightVec.y, lightVec.z);
+
+		lightLocObjectOne = glGetUniformLocation(objectOne.GLSLProgramID, "uLight");
+		glUniform3f(lightLocObjectOne, lightVec.x, lightVec.y, lightVec.z);
+		lightLocObjectTwo = glGetUniformLocation(objectOne.GLSLProgramID, "uLight");
+		glUniform3f(lightLocObjectTwo, lightVec.x, lightVec.y, lightVec.z);
+		lightLocObjectThree = glGetUniformLocation(objectOne.GLSLProgramID, "uLight");
+		glUniform3f(lightLocObjectThree, lightVec.x, lightVec.y, lightVec.z);
 
 		// TODO: draw OBJ model
-		object.draw();
-		
+		objectOne.draw();
+		objectTwo.draw();		
 
 		// Draw wireframe of arcBall with dynamic radius
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -365,7 +387,7 @@ int main(void)
 			arcballRBT = (sky_type == 0) ? worldRBT : skyRBT;
 			break;
 		case 1:
-			arcballRBT = objectRBT;
+			arcballRBT = objectOneRBT;
 			break;
 		default:
 			break;
@@ -391,7 +413,8 @@ int main(void)
 
 	// Clean up data structures and glsl objects
 	ground.cleanup();
-	object.cleanup();
+	objectOne.cleanup();
+	objectTwo.cleanup();
 
 	// Close OpenGL window and terminate GLFW
 	glfwTerminate();
