@@ -331,14 +331,14 @@ int main(void)
 	//TODO: Initialize model by loading .obj file
 	objectOne = Model();
 	init_obj(objectOne, "bunny.obj", glm::vec3(0.1, 0.3, 1.0));
-	objectOne.initialize(DRAW_TYPE::ARRAY, "NormalVertexShader.glsl","NormalFragmentShader.glsl");
+	objectOne.initialize(DRAW_TYPE::ARRAY, "PhongVertexShader.glsl","PhongFragmentShader.glsl");
 	objectOne.set_projection(&Projection);
 	objectOne.set_eye(&eyeRBT);
 	objectOne.set_model(&objectOneRBT);
 
 	objectTwo = Model();
 	init_obj(objectTwo, "bunny.obj", glm::vec3(0.6, 0.3, 1.0));
-	objectTwo.initialize(DRAW_TYPE::ARRAY, "PhongVertexShader.glsl", "PhongFragmentShader.glsl");
+	objectTwo.initialize(DRAW_TYPE::ARRAY, "ToonVertexShader.glsl", "ToonFragmentShader.glsl");
 	objectTwo.set_projection(&Projection);
 	objectTwo.set_eye(&eyeRBT);
 	objectTwo.set_model(&objectTwoRBT);
