@@ -2,7 +2,7 @@
 
 in vec3 fragmentPosition;
 in vec3 fragmentColor;
-in vec3 fragmentNormal;
+flat in vec3 fragmentNormal;
 in int fragmentLightState;
 
 // Ouput data
