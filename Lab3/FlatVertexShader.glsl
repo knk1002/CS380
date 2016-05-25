@@ -13,7 +13,7 @@ layout(location = 2) in vec3 vertexColor;
 // Output data ; will be interpolated for each fragment.
 out vec3 fragmentPosition;
 out vec3 fragmentColor;
-out vec3 fragmentNormal;
+flat out vec3 fragmentNormal;
 
 uniform mat4 ModelTransform;
 uniform mat4 Eye;

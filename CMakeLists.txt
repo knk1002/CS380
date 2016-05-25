@@ -103,8 +103,8 @@ add_executable(Lab3
 	Lab3/main.cpp
 	Lab3/NormalVertexShader.glsl
 	Lab3/NormalFragmentShader.glsl
-	Lab3/GouraudVertexShader.glsl
-	Lab3/GouraudFragmentShader.glsl
+	Lab3/FlatVertexShader.glsl
+	Lab3/FlatFragmentShader.glsl
 	Lab3/PhongVertexShader.glsl
 	Lab3/PhongFragmentShader.glsl
 	Lab3/ToonVertexShader.glsl
