@@ -43,9 +43,9 @@ Model ground, objectOne, objectTwo, objectThree;
 glm::mat4 skyRBT;
 glm::mat4 eyeRBT;
 const glm::mat4 worldRBT = glm::mat4(1.0f);
-glm::mat4 objectOneRBT = glm::scale(7.0f, 7.0f, 7.0f) * glm::rotate(glm::mat4(1.0f), 10.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-glm::mat4 objectTwoRBT = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f,0.0f,0.0f)) * glm::scale(7.0f, 7.0f, 7.0f) * glm::rotate(glm::mat4(1.0f), 10.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-glm::mat4 objectThreeRBT = glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, 0.0f, 0.0f)) * glm::scale(7.0f, 7.0f, 7.0f) * glm::rotate(glm::mat4(1.0f), 10.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+glm::mat4 objectOneRBT = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -1.0f, -1.0f)) * glm::scale(7.0f, 7.0f, 7.0f) * glm::rotate(glm::mat4(1.0f), 10.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+glm::mat4 objectTwoRBT = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, -1.0f, -1.0f)) * glm::scale(7.0f, 7.0f, 7.0f) * glm::rotate(glm::mat4(1.0f), 10.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+glm::mat4 objectThreeRBT = glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, -1.0f, -1.0f)) * glm::scale(7.0f, 7.0f, 7.0f) * glm::rotate(glm::mat4(1.0f), 10.0f, glm::vec3(1.0f, 0.0f, 0.0f));
 glm::mat4 arcballRBT = glm::mat4(1.0f);
 glm::mat4 aFrame;
 
@@ -389,7 +389,7 @@ int main(void)
 		eyeRBT = (view_index == 0) ? skyRBT : objectOneRBT;
 
 		//TODO: pass the light value to the shader
-		glm::vec3 lightVec = glm::vec3(0.0f, -1.0f, 0.0f);
+		glm::vec3 lightVec = glm::vec3(0.0f, -2.0f, 0.0f);
 		glm::vec3 lightPos = glm::vec3(0.0f, 0.0f, 0.0f);
 
 		UpdateLight(lightVec, lightPos, 0);
