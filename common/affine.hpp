@@ -13,14 +13,15 @@
 // output: L (4 x 4 matrix)
 glm::mat4 linearFact(glm::mat4 A)
 {
-	glm::mat4 L = A;
-	//L[0][3] = 0;
-	//L[1][3] = 0;
-	//L[2][3] = 0;
-	L[3][3] = 1;
-	L[3][0] = 0;
-	L[3][1] = 0;
-	L[3][2] = 0;
+	glm::mat4 L;
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			L[i][j] = A[i][j];
+		}
+	}
+	L[3][3] = 1.0f;
 	return L;
 }
 
@@ -30,10 +31,14 @@ glm::mat4 linearFact(glm::mat4 A)
 glm::mat4 transFact(glm::mat4 M)
 {
 	glm::mat4 T = glm::mat4(1.0f);
-	T[3][0] = M[3][0];
-	T[3][1] = M[3][1];
-	T[3][2] = M[3][2];
-
+	for (int i = 0; i < 3; i++)
+	{
+		T[3][i] = M[3][i];
+	}
 	return T;
 }
+
+// TODO: Define quaternion
+
+
 #endif
